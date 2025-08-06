@@ -1,8 +1,11 @@
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import BusinessPartnerSerializer
+from .serializers import BusinessPartnerSerializer, DevliveryRequestSerializer
 from drf_spectacular.utils import extend_schema, OpenApiExample
+from .models import DeliveryRequest
+from rest_framework.permissions import IsAuthenticated
 
 
 class BusinessPartnerRegisterView(APIView):
@@ -39,3 +42,10 @@ class BusinessPartnerRegisterView(APIView):
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeliveryRequestView(ModelViewSet):
+    model = DeliveryRequest
+    queryset = DeliveryRequest.objects.all()
+    serializer_class = DevliveryRequestSerializer
+    permission_classes = [IsAuthenticated]

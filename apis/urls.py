@@ -1,10 +1,18 @@
 from django.urls import path
-from .views import BusinessPartnerRegisterView
+from . import views
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+
+router.register(
+    "delivery-requests", views.DeliveryRequestView, basename="delivery-requests"
+)
+
 
 urlpatterns = [
     path(
         "register-business-partner/",
-        BusinessPartnerRegisterView.as_view(),
+        views.BusinessPartnerRegisterView.as_view(),
         name="register-business-partner",
     ),
-]
+] + router.urls

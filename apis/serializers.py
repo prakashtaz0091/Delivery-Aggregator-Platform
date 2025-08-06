@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import BusinessPartner
+from .models import BusinessPartner, DeliveryRequest
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -23,3 +23,18 @@ class BusinessPartnerSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**user_data)
         business_partner = BusinessPartner.objects.create(user=user, **validated_data)
         return business_partner
+
+
+class DevliveryRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeliveryRequest
+        fields = [
+            "id",
+            "description",
+            "status",
+            "requester",
+            "receiver_address",
+            "receiver_name",
+            "created_at",
+            "updated_at",
+        ]
