@@ -18,6 +18,6 @@ class BusinessPartnerSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user_data = validated_data.pop("user")
-        user = User.objects.create_user(**user_data)  # also handles password hashing
+        user = User.objects.create_user(**user_data)
         business_partner = BusinessPartner.objects.create(user=user, **validated_data)
         return business_partner
