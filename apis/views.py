@@ -2,9 +2,13 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import BusinessPartnerSerializer, DevliveryRequestSerializer
+from .serializers import (
+    BusinessPartnerSerializer,
+    DevliveryRequestSerializer,
+    DeliveryPartnerSerializer,
+)
 from drf_spectacular.utils import extend_schema, OpenApiExample
-from .models import DeliveryRequest
+from .models import DeliveryRequest, DeliveryPartner
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -49,3 +53,14 @@ class DeliveryRequestView(ModelViewSet):
     queryset = DeliveryRequest.objects.all()
     serializer_class = DevliveryRequestSerializer
     permission_classes = [IsAuthenticated]
+
+
+class DeliveryPartnerView(ModelViewSet):
+    model = DeliveryPartner
+    queryset = DeliveryPartner.objects.all()
+    serializer_class = DeliveryPartnerSerializer
+
+    def get_permissions(self):
+        if self.action != "create":
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()

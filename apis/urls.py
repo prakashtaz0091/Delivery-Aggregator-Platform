@@ -7,7 +7,9 @@ router = DefaultRouter()
 router.register(
     "delivery-requests", views.DeliveryRequestView, basename="delivery-requests"
 )
-
+router.register(
+    "delivery-partners", views.DeliveryPartnerView, basename="delivery-partners"
+)
 
 urlpatterns = [
     path(
