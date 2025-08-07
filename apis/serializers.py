@@ -13,10 +13,28 @@ class UserSerializer(serializers.ModelSerializer):
 
 class BusinessPartnerSerializer(serializers.ModelSerializer):
     user = UserSerializer()
+    business_name = serializers.CharField(max_length=200, required=False)
+    address = serializers.CharField(max_length=100, required=False)
+    created_at = serializers.DateTimeField(read_only=True)
+    updated_at = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = BusinessPartner
         fields = ["id", "user", "business_name", "address", "created_at", "updated_at"]
+
+    def validate_user(self, value):
+        username = value.get("username")
+
+        if not username:
+            raise serializers.ValidationError("Username is required.")
+
+        if username.isdigit() or username.isalpha():
+            raise serializers.ValidationError("Username must be alphanumeric.")
+
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError("Username already exists.")
+
+        return value
 
     def create(self, validated_data):
         user_data = validated_data.pop("user")
