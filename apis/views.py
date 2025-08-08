@@ -10,6 +10,12 @@ from .serializers import (
 from drf_spectacular.utils import extend_schema, OpenApiExample
 from .models import DeliveryRequest, DeliveryPartner
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import CustomTokenObtainPairSerializer
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
 
 class BusinessPartnerRegisterView(APIView):

@@ -13,7 +13,9 @@ class DeliveryPartner(models.Model):
 
 
 class BusinessPartner(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="partner_profile"
+    )
     business_name = models.CharField(max_length=200)
     address = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)

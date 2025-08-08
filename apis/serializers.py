@@ -1,6 +1,25 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import BusinessPartner, DeliveryRequest, DeliveryPartner
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)  # generate the default token response
+
+        # Add custom fields
+        data["user"] = {
+            "id": self.user.id,
+            "username": self.user.username,
+            "email": self.user.email,
+            "first_name": self.user.first_name,
+            "last_name": self.user.last_name,
+            "business_name": self.user.partner_profile.business_name,
+            "address": self.user.partner_profile.address,
+            "groups": list(self.user.groups.values_list("name", flat=True)),
+        }
+        return data
 
 
 class UserSerializer(serializers.ModelSerializer):
