@@ -20,8 +20,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 
 class BusinessPartnerRegisterView(APIView):
-    permission_classes = [IsAuthenticated]
-
     @extend_schema(
         request=BusinessPartnerSerializer,
         examples=[
@@ -36,7 +34,10 @@ class BusinessPartnerRegisterView(APIView):
                         "last_name": "Shrestha",
                     },
                     "business_name": "Optional",
-                    "address": "Optional",
+                    "addresses": [
+                        {"name": "Address 1", "latitude": 10.0, "longitude": 20.0},
+                        {"name": "Address 2", "latitude": 30.0, "longitude": 40.0},
+                    ],
                 },
                 request_only=True,
                 response_only=False,

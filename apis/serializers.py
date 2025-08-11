@@ -50,13 +50,20 @@ class UserSerializer(serializers.ModelSerializer):
 class BusinessPartnerSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     business_name = serializers.CharField(max_length=200, required=False)
-    address = serializers.CharField(max_length=100, required=False)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
+    addresses = AddressSerializer(many=True)
 
     class Meta:
         model = BusinessPartner
-        fields = ["id", "user", "business_name", "address", "created_at", "updated_at"]
+        fields = [
+            "id",
+            "user",
+            "business_name",
+            "addresses",
+            "created_at",
+            "updated_at",
+        ]
 
     def validate_user(self, value):
         username = value.get("username")
@@ -74,10 +81,14 @@ class BusinessPartnerSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user_data = validated_data.pop("user")
+        addresses = validated_data.pop("addresses")
         user = User.objects.create_user(**user_data)
         business_partner = BusinessPartner.objects.create(user=user, **validated_data)
         business_partner_group, _ = Group.objects.get_or_create(name="BusinessPartner")
         user.groups.add(business_partner_group)
+        for address in addresses:
+            address_obj, _ = Address.objects.get_or_create(**address)
+            business_partner.addresses.add(address_obj)
         return business_partner
 
 

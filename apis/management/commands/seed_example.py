@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from apis.models import DeliveryRequest, Address, BusinessPartner, DeliveryPartner
 from django.contrib.auth.models import User
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, Permission
 
 
 class Command(BaseCommand):
@@ -18,6 +18,24 @@ class Command(BaseCommand):
         print(f"Created superuser: {su}")
 
         business_partner_group, _ = Group.objects.get_or_create(name="BusinessPartner")
+
+        # List of permission codenames
+        permission_codenames = [
+            "add_address",
+            "view_address",
+            "change_address",
+            "add_deliveryrequest",
+            "view_deliveryrequest",
+            "change_deliveryrequest",
+            "view_deliverypartner",
+        ]
+
+        # Fetch the actual Permission objects
+        permissions = Permission.objects.filter(codename__in=permission_codenames)
+
+        # Assign them to the group
+        business_partner_group.permissions.set(permissions)
+
         delivery_partner_group, _ = Group.objects.get_or_create(name="DeliveryPartner")
 
         # create normal users
