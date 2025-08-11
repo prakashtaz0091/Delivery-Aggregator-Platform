@@ -58,6 +58,14 @@ class DeliveryRequest(models.Model):
     receiver_address = models.CharField(max_length=100)
     receiver_name = models.CharField(max_length=100)
 
+    delivery_partner = models.ForeignKey(
+        DeliveryPartner,
+        on_delete=models.DO_NOTHING,
+        related_name="delivery_partners",
+        null=True,
+        blank=True,
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

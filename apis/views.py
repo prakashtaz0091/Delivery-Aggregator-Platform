@@ -12,6 +12,7 @@ from .models import DeliveryRequest, DeliveryPartner
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import CustomTokenObtainPairSerializer
+from .permissions import RoleBasedPermission
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -19,6 +20,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 
 class BusinessPartnerRegisterView(APIView):
+    permission_classes = [IsAuthenticated]
+
     @extend_schema(
         request=BusinessPartnerSerializer,
         examples=[
@@ -58,17 +61,19 @@ class BusinessPartnerRegisterView(APIView):
 
 class DeliveryRequestView(ModelViewSet):
     model = DeliveryRequest
-    queryset = DeliveryRequest.objects.all()
     serializer_class = DevliveryRequestSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RoleBasedPermission]
+
+    def get_queryset(self):
+        if self.request.user.is_superuser:  # if use is admin/superuser
+            return DeliveryRequest.objects.all()
+        return DeliveryRequest.objects.filter(
+            requester=self.request.user.partner_profile
+        )
 
 
 class DeliveryPartnerView(ModelViewSet):
     model = DeliveryPartner
     queryset = DeliveryPartner.objects.all()
     serializer_class = DeliveryPartnerSerializer
-
-    def get_permissions(self):
-        if self.action != "create":
-            self.permission_classes = [IsAuthenticated]
-        return super().get_permissions()
+    permission_classes = [IsAuthenticated]

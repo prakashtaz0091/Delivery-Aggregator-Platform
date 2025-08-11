@@ -1,7 +1,14 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import BusinessPartner, DeliveryRequest, DeliveryPartner
+from .models import BusinessPartner, DeliveryRequest, DeliveryPartner, Address
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth.models import Group
+
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = ["id", "name", "latitude", "longitude"]
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -15,10 +22,20 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             "email": self.user.email,
             "first_name": self.user.first_name,
             "last_name": self.user.last_name,
-            "business_name": self.user.partner_profile.business_name,
-            "address": self.user.partner_profile.address,
-            "groups": list(self.user.groups.values_list("name", flat=True)),
         }
+        try:
+            data["user"].update(
+                {
+                    "business_name": self.user.partner_profile.business_name,
+                    "address": AddressSerializer(
+                        self.user.partner_profile.addresses.all(), many=True
+                    ).data,
+                    "groups": list(self.user.groups.values_list("name", flat=True)),
+                }
+            )
+        except Exception as e:
+            print(e)
+
         return data
 
 
@@ -59,10 +76,31 @@ class BusinessPartnerSerializer(serializers.ModelSerializer):
         user_data = validated_data.pop("user")
         user = User.objects.create_user(**user_data)
         business_partner = BusinessPartner.objects.create(user=user, **validated_data)
+        business_partner_group, _ = Group.objects.get_or_create(name="BusinessPartner")
+        user.groups.add(business_partner_group)
         return business_partner
 
 
+class DeliveryPartnerSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    created_at = serializers.DateTimeField(read_only=True)
+    updated_at = serializers.DateTimeField(read_only=True)
+    addresses = AddressSerializer(many=True)
+
+    class Meta:
+        model = DeliveryPartner
+        fields = ["id", "user", "company_name", "addresses", "created_at", "updated_at"]
+
+    def create(self, validated_data):
+        user_data = validated_data.pop("user")
+        user = User.objects.create_user(**user_data)
+        delivery_partner = DeliveryPartner.objects.create(user=user, **validated_data)
+        return delivery_partner
+
+
 class DevliveryRequestSerializer(serializers.ModelSerializer):
+    requester = BusinessPartnerSerializer(read_only=True)
+
     class Meta:
         model = DeliveryRequest
         fields = [
@@ -76,18 +114,6 @@ class DevliveryRequestSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
 
-
-class DeliveryPartnerSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-    created_at = serializers.DateTimeField(read_only=True)
-    updated_at = serializers.DateTimeField(read_only=True)
-
-    class Meta:
-        model = DeliveryPartner
-        fields = ["id", "user", "company_name", "created_at", "updated_at"]
-
     def create(self, validated_data):
-        user_data = validated_data.pop("user")
-        user = User.objects.create_user(**user_data)
-        delivery_partner = DeliveryPartner.objects.create(user=user, **validated_data)
-        return delivery_partner
+        validated_data["requester"] = self.context["request"].user.partner_profile
+        return super().create(validated_data)

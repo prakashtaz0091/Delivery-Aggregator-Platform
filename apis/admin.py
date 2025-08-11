@@ -53,7 +53,15 @@ class DeliveryPartnerAdmin(admin.ModelAdmin):
 
 
 class DeliveryRequestAdmin(admin.ModelAdmin):
-    list_display = ["description", "requester", "receiver_name", "receiver_address"]
+    list_display = [
+        "description",
+        "requester",
+        "receiver_name",
+        "receiver_address",
+        "status",
+        "delivery_partner",
+        "pending_sync",
+    ]
 
     def requester(self, obj):
         return obj.requester.business_name

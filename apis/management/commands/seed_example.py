@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from apis.models import DeliveryRequest, Address, BusinessPartner, DeliveryPartner
 from django.contrib.auth.models import User
+from django.contrib.auth.models import Group
 
 
 class Command(BaseCommand):
@@ -16,6 +17,9 @@ class Command(BaseCommand):
         )
         print(f"Created superuser: {su}")
 
+        business_partner_group, _ = Group.objects.get_or_create(name="BusinessPartner")
+        delivery_partner_group, _ = Group.objects.get_or_create(name="DeliveryPartner")
+
         # create normal users
         bu1 = User.objects.create_user(
             username="business_user",
@@ -26,6 +30,9 @@ class Command(BaseCommand):
             username="business_user2",
             password="pass",
         )
+
+        bu1.groups.add(business_partner_group)
+        bu2.groups.add(business_partner_group)
 
         print("Created business users", bu1, bu2)
 
@@ -38,6 +45,9 @@ class Command(BaseCommand):
             username="delivery_user2",
             password="pass",
         )
+
+        du1.groups.add(delivery_partner_group)
+        du2.groups.add(delivery_partner_group)
         print(f"Created delivery users: {du1}, {du2}")
 
         # Create address

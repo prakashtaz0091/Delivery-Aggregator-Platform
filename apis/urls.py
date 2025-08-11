@@ -5,10 +5,10 @@ from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 
 router.register(
-    "delivery-requests", views.DeliveryRequestView, basename="delivery-requests"
+    "delivery-requests", views.DeliveryRequestView, basename="deliveryrequest"
 )
 router.register(
-    "delivery-partners", views.DeliveryPartnerView, basename="delivery-partners"
+    "delivery-partners", views.DeliveryPartnerView, basename="deliverypartner"
 )
 
 urlpatterns = [
